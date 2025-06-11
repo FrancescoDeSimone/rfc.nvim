@@ -1,33 +1,44 @@
--- main module file
 local viewer = require("rfc.viewer")
 
----@class Config
----@field opt string Your config option
-local config = {
+---@class RFC.ConfigOpts
+---@field picker string
+---@field notification boolean
+
+---@class RFC.Config
+---@field opts RFC.ConfigOpts
+
+---@class RFCModule
+---@field config RFC.Config
+---@field setup fun(opts: { picker?: string, notification?: boolean }?)
+---@field rfcOpen fun(): nil
+---@field picker fun(name: string): RFCViewer.Picker
+
+local RFC = {}
+
+RFC.config = {
   opts = {
-    picker = "snacks",
+    picker = "snacks", -- or "telescope"
     notification = false,
   },
 }
 
----@class RFC
-local RFC = {}
-
----@type Config
-RFC.config = config
-RFC.picker = function(picker_name)
-  return require("rfc.pickers").get(picker_name)
+---@param args RFC.ConfigOpts
+function RFC.setup(args)
+  args = args or {}
+  RFC.config.opts = vim.tbl_deep_extend("force", RFC.config.opts, args)
 end
 
----@param args Config?
--- you can define your setup function here. Usually configurations can be merged, accepting outside params and
--- you can also put some validation here for those.
-RFC.setup = function(args)
-  RFC.config = vim.tbl_deep_extend("force", RFC.config, args or {})
+---@param name string
+---@return RFCViewer.Picker
+function RFC.picker(name)
+  return require("rfc.pickers").get(name)
 end
 
-RFC.rfcOpen = function()
-  return viewer.Open(RFC.config.opts, RFC.picker(RFC.config.opts.picker))
+--- Entry point to open the RFC index viewer
+function RFC.rfcOpen()
+  local opts = RFC.config.opts
+  local picker = RFC.picker(opts.picker)
+  viewer.Open(opts, picker)
 end
 
 return RFC
