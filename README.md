@@ -14,14 +14,14 @@ Install with your favorite package manager:
 lazy.nvim:
 ```Lua
 {
-  'FrancescoDeSimone/rfc.nvim', 
+  'FrancescoDeSimone/rfc.nvim',
   dependencies = {
     'nvim-telescope/telescope.nvim', -- or snacks.nvim
   },
   config = function()
     require('rfc').setup({
       picker = 'telescope', -- or 'snacks'
-      notification = true,  -- Enable/disable notifications
+      notification = false,  -- Enable/disable notifications
     })
   end
 }
@@ -31,4 +31,14 @@ lazy.nvim:
 Open the RFC index:
 ```vim
 :RFC
+```
+
+You can cleanup the cache:
+```vim
+:RFC clean
+```
+
+You can force refresh rfc already downloaded once opened:
+```vim
+:RFC refresh
 ```
