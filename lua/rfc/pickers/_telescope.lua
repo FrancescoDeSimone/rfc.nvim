@@ -1,11 +1,10 @@
-local fetcher = require("rfc.fetcher")
-local utils = require("rfc.utils")
-
 local M = {}
 
 ---@param entries string[]
 M.show = function(entries)
-  local ok, telescope = pcall(require, "telescope")
+  local utils = require("rfc.utils")
+  local viewer = require("rfc.viewer")
+  local ok, _ = pcall(require, "telescope")
   if not ok then
     utils.notify("Telescope not found", vim.log.levels.ERROR)
     return
@@ -28,35 +27,27 @@ M.show = function(entries)
       }),
       sorter = conf.generic_sorter({}),
       attach_mappings = function(prompt_bufnr, map)
-        local function get_rfc_number()
-          local entry = action_state.get_selected_entry()
-          if entry and entry.value then
-            return tonumber(string.match(entry.value, "^(%d+)"))
-          end
-          return nil
-        end
-
         actions.select_default:replace(function()
+          local entry = action_state.get_selected_entry()
           actions.close(prompt_bufnr)
-          local rfc = get_rfc_number()
-          if rfc then
-            fetcher.open_rfc_document(rfc, nil)
+          if entry then
+            viewer.select_and_open(entry.value, nil)
           end
         end)
 
         map("i", "<C-v>", function()
+          local entry = action_state.get_selected_entry()
           actions.close(prompt_bufnr)
-          local rfc = get_rfc_number()
-          if rfc then
-            fetcher.open_rfc_document(rfc, "vnew")
+          if entry then
+            viewer.select_and_open(entry.value, "vnew")
           end
         end)
 
         map("i", "<C-x>", function()
+          local entry = action_state.get_selected_entry()
           actions.close(prompt_bufnr)
-          local rfc = get_rfc_number()
-          if rfc then
-            fetcher.open_rfc_document(rfc, "new")
+          if entry then
+            viewer.select_and_open(entry.value, "new")
           end
         end)
 

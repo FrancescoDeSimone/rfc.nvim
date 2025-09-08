@@ -1,21 +1,14 @@
 local M = {}
-local function open_rfc(picker, open_mode)
-  local fetcher = require("rfc.fetcher")
-  local item = picker:current()
-  if not item then
-    return
-  end
-
-  picker:close()
-  local num = tonumber(item.value:match("^(%d+)"))
-  if num then
-    fetcher.open_rfc_document(num, open_mode)
-  end
-end
 
 ---@param rfc_data string[]
 function M.show(rfc_data)
-  local snacks = require("snacks")
+  local ok, snacks = pcall(require, "snacks")
+  local viewer = require("rfc.viewer")
+  local utils = require("rfc.utils")
+  if not ok then
+    utils.notify("snacks not found", vim.log.levels.ERROR)
+    return
+  end
 
   snacks.picker.pick({
     prompt = "RFC Index> ",
@@ -28,13 +21,25 @@ function M.show(rfc_data)
 
     actions = {
       open = function(picker)
-        open_rfc(picker, nil)
+        local item = picker:current()
+        picker:close()
+        if item then
+          viewer.select_and_open(item.value, nil)
+        end
       end,
       open_vsplit = function(picker)
-        open_rfc(picker, "vnew")
+        local item = picker:current()
+        picker:close()
+        if item then
+          viewer.select_and_open(item.value, "vnew")
+        end
       end,
       open_split = function(picker)
-        open_rfc(picker, "new")
+        local item = picker:current()
+        picker:close()
+        if item then
+          viewer.select_and_open(item.value, "new")
+        end
       end,
     },
 

@@ -22,4 +22,16 @@ viewer.Open = function(opts, picker)
   })
 end
 
+---@param entry_value string | nil The full string value from the picker (e.g., "1234: Title").
+---@param open_mode string | nil The command to use for opening the window (e.g., "vnew").
+function viewer.select_and_open(entry_value, open_mode)
+  if not entry_value then
+    return
+  end
+
+  local rfc_number = tonumber(string.match(entry_value, "^(%d+)"))
+  if rfc_number then
+    fetcher.open_rfc_document(rfc_number, open_mode)
+  end
+end
 return viewer
