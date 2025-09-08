@@ -10,8 +10,7 @@ local viewer = require("rfc.viewer")
 ---@class RFCModule
 ---@field config RFC.Config
 ---@field setup fun(opts: { picker?: string, notification?: boolean }?)
----@field rfcOpen fun(): nil
----@field picker fun(name: string): RFCViewer.Picker
+---@field command fun(opts: { fargs: string[] })
 
 local RFC = {}
 
@@ -28,17 +27,44 @@ function RFC.setup(args)
   RFC.config.opts = vim.tbl_deep_extend("force", RFC.config.opts, args)
 end
 
----@param name string
----@return RFCViewer.Picker
-function RFC.picker(name)
+local function Picker(name)
   return require("rfc.pickers").get(name)
 end
 
---- Entry point to open the RFC index viewer
-function RFC.rfcOpen()
+local function RfcOpen()
   local opts = RFC.config.opts
-  local picker = RFC.picker(opts.picker)
+  local picker = Picker(opts.picker)
   viewer.Open(opts, picker)
+end
+
+local function RfcClean()
+  local cache_dir = vim.fn.stdpath("cache") .. "/rfc"
+  vim.fn.delete(cache_dir, "rf")
+  vim.notify("Clean cache dir: " .. cache_dir)
+end
+
+local function RfcRefresh()
+  require("rfc.fetcher").fetch_rfc_index({
+    on_done = function(results)
+      require("rfc.utils").notify("RFC Index refreshed successfully. Found " .. #results .. " entries.")
+    end,
+    on_error = function(err_msg)
+      vim.notify(err_msg, vim.log.levels.ERROR, { title = "RFC Viewer" })
+    end,
+  }, true)
+end
+
+--- Entry point to open the RFC index viewer
+---@param opts table The arguments passed by the user command
+function RFC.command(opts)
+  local arg = (opts.fargs or {})[1]
+  if arg == "clean" then
+    RfcClean()
+  elseif arg == "refresh" then
+    RfcRefresh()
+  else
+    RfcOpen()
+  end
 end
 
 return RFC
