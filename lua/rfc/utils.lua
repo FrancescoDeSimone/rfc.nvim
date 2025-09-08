@@ -54,4 +54,32 @@ function M.fetch_url(opts)
   })
 end
 
+--- Reads a file and returns its contents as a table of lines.
+--- If the file does not exist or cannot be opened, returns nil.
+--- @param path string The absolute or relative path to the file.
+--- @return string[]|nil Lines of the file as a list of strings, or nil if the file couldn't be read.
+function M.read_file_if_exists(path)
+  local f = io.open(path, "r")
+  if not f then
+    return nil
+  end
+  local content = f:read("*a")
+  f:close()
+  return vim.split(content, "\n", { plain = true })
+end
+
+--- Reads a file and returns its contents as a table of lines.
+--- If the file does not exist or cannot be opened, returns nil.
+--- @param path string The absolute or relative path to the file.
+--- @return string[]|nil Lines of the file as a list of strings, or nil if the file couldn't be read.
+function M.write_file(path, content)
+  local f = io.open(path, "w")
+  if not f then
+    return false
+  end
+  f:write(content)
+  f:close()
+  return true
+end
+
 return M

@@ -16,7 +16,14 @@ local RFC = {}
 
 RFC.config = {
   opts = {
-    picker = "snacks", -- or "telescope"
+    -- pick the first not null picker
+    picker = (function()
+      for _, p in pairs(require("rfc.pickers")) do
+        if p then
+          return p
+        end
+      end
+    end)(),
     notification = false,
   },
 }
